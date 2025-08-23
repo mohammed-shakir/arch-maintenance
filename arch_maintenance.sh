@@ -84,7 +84,18 @@ pacman -S --needed archlinux-keyring --noconfirm
 
 ###─── Firmware updates ────────────────────────────────────────────────────────###
 echo -e "\n${GREEN}🔄 Updating firmware via fwupd…${NC}"
-fwupdmgr refresh && fwupdmgr update -y
+set +e
+fwupdmgr refresh
+fwupdmgr update -y
+rc=$?
+set -e
+if [[ $rc -eq 0 ]]; then
+	echo -e "${GREEN}✔ Firmware updates applied (or scheduled).${NC}"
+elif [[ $rc -eq 2 ]]; then
+	echo -e "${GREEN}✔ No firmware updates available.${NC}"
+else
+	echo -e "${YELLOW}⚠️  fwupdmgr returned exit code $rc; continuing.${NC}"
+fi
 
 ###─── Docker cleanup ──────────────────────────────────────────────────────────###
 if command -v docker &>/dev/null; then
